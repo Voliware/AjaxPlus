@@ -1,0 +1,22 @@
+{
+  "name": "AjaxPlus",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthony Agostino",
+    "url": "https://github.com/tones31"
+  },
+  "bugs": {
+    "url": "https://github.com/voliware/AjaxPlus/issues"
+  },
+  "description": "",
+  "homepage": "https://github.com/voliware/AjaxPlus",
+  "keywords": [],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voliware/AjaxPlus.git"
+  },
+  "devDependencies": {
+    "gulp-webbuild": "^1.0.0"
+  }
+}
