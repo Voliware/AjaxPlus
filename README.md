@@ -24,7 +24,7 @@ var monitor = new AjaxMonitor({
 });
 ```
 
-Also included is `AjaxPoll` and `AjaxQueue`. Read more about [Ajax+](https://github.com/Voliware/AjaxPlus/wiki).
+Also included is `AjaxPoll` and `AjaxQueue`. Read more about [AjaxPlus](https://github.com/Voliware/AjaxPlus/wiki).
 
 ## Documentation & Tutorials
 
