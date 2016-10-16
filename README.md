@@ -30,6 +30,12 @@ Also included is `AjaxPoll` and `AjaxQueue`. Read more about [AjaxPlus](https://
 
 View the [docs](http://voliware.github.io/AjaxPlus) for a `jsDoc` documentation, or check out the [Wiki](https://github.com/Voliware/AjaxPlus/wiki) for step-by-step explinations of how to use all of the classes.
 
+## Installation
+Simply include the minified or non-minified [production builds](https://github.com/Voliware/AjaxPlus/tree/master/dist/js) in web app.
+
+## Dependencies
+`AjaxPlus` depends on the [WebUtil](https://github.com/Voliware/WebUtil) library. This small library is already built into the distribution and does not need to be included.
+
 ## Contributors
 Written by Anthony Agostino.
 
