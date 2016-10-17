@@ -1,5 +1,5 @@
 ## AjaxPlus
-`AjaxPlus+` is small a library of AJAX modules, including:
+`AjaxPlus` is small a library of AJAX modules, including:
 
 ### AjaxModule
 Fetches data via an AJAX request every x milliseconds.
