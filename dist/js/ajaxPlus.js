@@ -87,6 +87,15 @@ if (typeof getType === 'undefined') {
 		return Object.prototype.toString.call(x);
 	};
 }
+if (typeof createGuid === 'undefined') {
+	window.createGuid = function createGuid() {
+		function s4() {
+			return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+		}
+		return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+	};
+}
+
 // array
 if (typeof Array.diff === 'undefined') {
 	Array.diff = function (a, b) {
@@ -163,8 +172,8 @@ var EventSystem = function () {
 
 
 	_createClass(EventSystem, [{
-		key: '_create',
-		value: function _create(name) {
+		key: '_createEvent',
+		value: function _createEvent(name) {
 			return this.events[name] = { callbacks: [] };
 		}
 
@@ -194,7 +203,7 @@ var EventSystem = function () {
 		value: function on(name, callback) {
 			var event = this.events[name];
 
-			if (!isDefined(event)) event = this._create(name);
+			if (!isDefined(event)) event = this._createEvent(name);
 
 			event.callbacks.push(callback);
 			return this;
@@ -869,7 +878,7 @@ var AjaxQueue = function (_EventSystem3) {
   * Constructor
   * @param {object} [options]
   * @param {number} [options.size=100] - size of the queue
-  * @param {number} [options.timeout=0] - timeout between requests in ms
+  * @param {number} [options.delay=0] - delay between requests in ms
   * @param {boolean} [options.abortOnFail=false] - whether to abandon the queue if one request fails
   * @returns {AjaxQueue}
   */
@@ -882,7 +891,7 @@ var AjaxQueue = function (_EventSystem3) {
 
 		var defaults = {
 			size: 100,
-			timeout: 0,
+			delay: 0,
 			abortOnFail: false
 		};
 		_this4.settings = $.extend(defaults, options);
@@ -901,26 +910,25 @@ var AjaxQueue = function (_EventSystem3) {
 	_createClass(AjaxQueue, [{
 		key: '_next',
 		value: function _next() {
-			var timeout = this.settings.timeout;
 			this.inProgress = false;
-			if (timeout > 0) setTimeout(this.dequeue.bind(this), timeout);else this.dequeue();
+			if (this.settings.delay > 0) setTimeout(this.dequeue.bind(this), this.settings.delay);else this.dequeue();
 			return this;
 		}
 
 		/**
    * Enqueue a request.
    * Dequeues all requests immediately after
-   * @param {jQuery|jQuery[]} arguments - the request(s)
+   * @param {...jQuery}  arguments - the request(s)
    * @returns {AjaxQueue}
    */
 
 	}, {
 		key: 'enqueue',
 		value: function enqueue() {
-			var args = arguments.length > 0 ? Array.prototype.slice.call(arguments) : arguments[0];
-
 			if (this.queue.length <= this.settings.size) {
-				this.queue.push(args);
+				var _queue;
+
+				(_queue = this.queue).push.apply(_queue, arguments);
 				this.dequeue();
 			} else {
 				console.warn("AjaxQueue.enqueue: queue size is at limit");
