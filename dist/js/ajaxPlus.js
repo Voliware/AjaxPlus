@@ -925,7 +925,7 @@ var AjaxQueue = function (_EventSystem3) {
 	}, {
 		key: 'enqueue',
 		value: function enqueue() {
-			if (this.queue.length <= this.settings.size) {
+			if (this.queue.length < this.settings.size) {
 				var _queue;
 
 				(_queue = this.queue).push.apply(_queue, arguments);
