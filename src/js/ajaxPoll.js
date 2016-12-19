@@ -51,14 +51,14 @@ class AjaxPoll extends AjaxModule {
 
 	/**
 	 * Request failure handler
-	 * @param {object} err
+	 * @param {*} data
 	 * @returns {AjaxPoll}
 	 * @private
 	 */
-	_fail(err){
+	_fail(data){
 		if(this.settings.maxFails > 0){
 			this.fails++;
-			this._checkFailure();
+			this._checkFailure(data);
 		}
 		return this;
 	}
@@ -88,6 +88,8 @@ class AjaxPoll extends AjaxModule {
 		if(exp === data || (typeof exp === 'function' && exp(data))){
 			this.dfd.resolve(data);
 			this.stop();
+			this.trigger('done', data);
+			this.trigger('always');
 		}
 		return this;
 	}
@@ -96,13 +98,16 @@ class AjaxPoll extends AjaxModule {
 	 * Check if the maximum amount
 	 * of polls has been reached.
 	 * If it has, the request is rejected
+	 * @param {*} data
 	 * @returns {AjaxPoll}
 	 * @private
 	 */
-	_checkPolls(){
+	_checkPolls(data){
 		if(this.polls >= this.settings.maxPolls){
 			this.dfd.reject();
 			this.stop();
+			this.trigger('fail', data);
+			this.trigger('always');
 		}
 		return this;
 	}
@@ -111,13 +116,16 @@ class AjaxPoll extends AjaxModule {
 	 * Check if the maximum amount
 	 * of failures has been reached.
 	 * If it has, the request is rejected
+	 * @param {*} data
 	 * @returns {AjaxPoll}
 	 * @private
 	 */
-	_checkFailure(){
+	_checkFailure(data){
 		if(this.fails >= this.settings.maxFails){
 			this.dfd.reject();
 			this.stop();
+			this.trigger('fail', data);
+			this.trigger('always');
 		}
 		return this;
 	}
@@ -128,6 +136,7 @@ class AjaxPoll extends AjaxModule {
 	 */
 	start(){
 		super.start();
+		this.dfd = $.Deferred();
 		return this.dfd.promise();
 	}
 }

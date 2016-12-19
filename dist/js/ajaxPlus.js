@@ -318,7 +318,7 @@ var AjaxModule = function (_EventSystem) {
 
 		_classCallCheck(this, AjaxModule);
 
-		if (!isDefined(options)) throw new ReferenceError("AjaxModule.constructor: must pass an options object or an AJAX call");
+		if (!isDefined(options)) throw new ReferenceError("AjaxModule.constructor: must pass an options object");
 
 		var _this = _possibleConstructorReturn(this, (AjaxModule.__proto__ || Object.getPrototypeOf(AjaxModule)).call(this));
 
@@ -335,11 +335,15 @@ var AjaxModule = function (_EventSystem) {
 			password: ''
 		};
 
+		// properties
 		_this.settings = $.extend(defaults, options);
 		_this.interval = null;
-		_this.isFirstUpdate = true;
 		_this._cachedData = {};
 
+		// states
+		_this.isFirstUpdate = true;
+
+		// determine which request to use
 		_this._request = _this.settings.request ? _this._useRequest.bind(_this) : _this._useOptions.bind(_this);
 
 		return _ret = _this, _possibleConstructorReturn(_this, _ret);
@@ -361,13 +365,10 @@ var AjaxModule = function (_EventSystem) {
 				self._cacheData(data);
 				data = self._processData(data);
 				self._done(data);
-				self.trigger('done', data);
-			}).fail(function (err) {
-				self._fail(err);
-				self.trigger('fail', err);
+			}).fail(function (data) {
+				self._fail(data);
 			}).always(function () {
 				self._always();
-				self.trigger('always');
 				self.isFirstUpdate = false;
 			});
 		}
@@ -410,39 +411,43 @@ var AjaxModule = function (_EventSystem) {
 		/**
    * Success callback
    * @param {*} data
+   * @returns {AjaxModule}
    * @private
-   * @abstract
    */
 
 	}, {
 		key: '_done',
-		value: function _done(data) {}
-		// implement in child
-
+		value: function _done(data) {
+			this.trigger('done', data);
+			return this;
+		}
 
 		/**
    * Fail callback
-   * @param {object} err
+   * @param {*} data
+   * @returns {AjaxModule}
    * @private
-   * @abstract
    */
 
 	}, {
 		key: '_fail',
-		value: function _fail(err) {}
-		// implement in child
-
+		value: function _fail(data) {
+			this.trigger('fail', data);
+			return this;
+		}
 
 		/**
    * Always callback
+   * @returns {AjaxModule}
    * @private
    */
 
 	}, {
 		key: '_always',
-		value: function _always() {}
-		// implement in child
-
+		value: function _always() {
+			this.trigger('always');
+			return this;
+		}
 
 		/**
    * Cache data
@@ -563,17 +568,17 @@ var AjaxPoll = function (_AjaxModule) {
 
 		/**
    * Request failure handler
-   * @param {object} err
+   * @param {*} data
    * @returns {AjaxPoll}
    * @private
    */
 
 	}, {
 		key: '_fail',
-		value: function _fail(err) {
+		value: function _fail(data) {
 			if (this.settings.maxFails > 0) {
 				this.fails++;
-				this._checkFailure();
+				this._checkFailure(data);
 			}
 			return this;
 		}
@@ -609,6 +614,8 @@ var AjaxPoll = function (_AjaxModule) {
 			if (exp === data || typeof exp === 'function' && exp(data)) {
 				this.dfd.resolve(data);
 				this.stop();
+				this.trigger('done', data);
+				this.trigger('always');
 			}
 			return this;
 		}
@@ -617,16 +624,19 @@ var AjaxPoll = function (_AjaxModule) {
    * Check if the maximum amount
    * of polls has been reached.
    * If it has, the request is rejected
+   * @param {*} data
    * @returns {AjaxPoll}
    * @private
    */
 
 	}, {
 		key: '_checkPolls',
-		value: function _checkPolls() {
+		value: function _checkPolls(data) {
 			if (this.polls >= this.settings.maxPolls) {
 				this.dfd.reject();
 				this.stop();
+				this.trigger('fail', data);
+				this.trigger('always');
 			}
 			return this;
 		}
@@ -635,16 +645,19 @@ var AjaxPoll = function (_AjaxModule) {
    * Check if the maximum amount
    * of failures has been reached.
    * If it has, the request is rejected
+   * @param {*} data
    * @returns {AjaxPoll}
    * @private
    */
 
 	}, {
 		key: '_checkFailure',
-		value: function _checkFailure() {
+		value: function _checkFailure(data) {
 			if (this.fails >= this.settings.maxFails) {
 				this.dfd.reject();
 				this.stop();
+				this.trigger('fail', data);
+				this.trigger('always');
 			}
 			return this;
 		}
@@ -658,6 +671,7 @@ var AjaxPoll = function (_AjaxModule) {
 		key: 'start',
 		value: function start() {
 			_get(AjaxPoll.prototype.__proto__ || Object.getPrototypeOf(AjaxPoll.prototype), 'start', this).call(this);
+			this.dfd = $.Deferred();
 			return this.dfd.promise();
 		}
 	}]);
