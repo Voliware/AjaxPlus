@@ -27,7 +27,7 @@ class AjaxModule extends EventSystem {
 	 */
     constructor(options){
 		if (!isDefined(options))
-			throw new ReferenceError("AjaxModule.constructor: must pass an options object or an AJAX call");
+			throw new ReferenceError("AjaxModule.constructor: must pass an options object");
 
 		super();
 			var defaults = {
@@ -43,11 +43,15 @@ class AjaxModule extends EventSystem {
 				password: ''
 			};
 
+		// properties
 		this.settings = $.extend(defaults, options);
         this.interval = null;
-		this.isFirstUpdate = true;
 		this._cachedData = {};
 
+		// states
+		this.isFirstUpdate = true;
+
+		// determine which request to use
 		this._request = this.settings.request
 			? this._useRequest.bind(this)
 			: this._useOptions.bind(this);
@@ -68,15 +72,12 @@ class AjaxModule extends EventSystem {
 				self._cacheData(data);
 				data = self._processData(data);
 				self._done(data);
-				self.trigger('done', data);
 			})
-			.fail(function(err){
-				self._fail(err);
-				self.trigger('fail', err);
+			.fail(function(data){
+				self._fail(data);
 			})
 			.always(function(){
 				self._always();
-				self.trigger('always');
 				self.isFirstUpdate = false;
 			});
 	}
@@ -113,29 +114,33 @@ class AjaxModule extends EventSystem {
 	/**
 	 * Success callback
 	 * @param {*} data
+	 * @returns {AjaxModule}
 	 * @private
-	 * @abstract
 	 */
 	_done(data){
-		// implement in child
+		this.trigger('done', data);
+		return this;
 	}
 
 	/**
 	 * Fail callback
-	 * @param {object} err
+	 * @param {*} data
+	 * @returns {AjaxModule}
 	 * @private
-	 * @abstract
 	 */
-	_fail(err){
-		// implement in child
+	_fail(data){
+		this.trigger('fail', data);
+		return this;
 	}
 
 	/**
 	 * Always callback
+	 * @returns {AjaxModule}
 	 * @private
 	 */
 	_always(){
-		// implement in child
+		this.trigger('always');
+		return this;
 	}
 
 	/**

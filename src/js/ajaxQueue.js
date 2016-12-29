@@ -54,7 +54,7 @@ class AjaxQueue extends EventSystem {
 	 * @returns {AjaxQueue}
 	 */
 	enqueue(){
-		if(this.queue.length < this.settings.size){
+		if(this.queue.length <= this.settings.size){
 			this.queue.push(...arguments);
 			this.dequeue();
 		}
