@@ -1060,7 +1060,7 @@ var AjaxSequence = function (_AjaxQueue) {
 				this.queue[this.currentRequest]().done(function (data) {
 					onComplete(data);
 				}).fail(function (data) {
-					if (self.settings.abortOnFail) defer.reject();else onComplete(data);
+					if (self.settings.abortOnFail) defer.reject(data);else onComplete(data);
 				});
 			}
 

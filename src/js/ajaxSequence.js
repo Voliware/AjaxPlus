@@ -66,7 +66,7 @@ class AjaxSequence extends AjaxQueue {
 				})
 				.fail(function(data){
 					if(self.settings.abortOnFail)
-						defer.reject();
+						defer.reject(data);
 					else
 						onComplete(data);
 				});
