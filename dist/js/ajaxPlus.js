@@ -981,3 +981,101 @@ var AjaxQueue = function (_EventSystem3) {
 
 	return AjaxQueue;
 }(EventSystem);
+/*!
+ * ajaxSequence
+ * https://github.com/Voliware/AjaxPlus
+ * Licensed under the MIT license.
+ */
+
+/**
+ * Like a queue, builds up an array of ajax requests
+ * and only fires them when dequeue is called.
+ * Returns a promise when all requests are complete.
+ * Pushes each request data (done or fail) into an array.
+ * @extends AjaxQueue
+ */
+
+
+var AjaxSequence = function (_AjaxQueue) {
+	_inherits(AjaxSequence, _AjaxQueue);
+
+	/**
+  * Constructor
+  * @param {object} [options]
+  * @returns {AjaxSequence}
+  */
+	function AjaxSequence(options) {
+		var _ret5;
+
+		_classCallCheck(this, AjaxSequence);
+
+		// properties
+		var _this5 = _possibleConstructorReturn(this, (AjaxSequence.__proto__ || Object.getPrototypeOf(AjaxSequence)).call(this, options));
+
+		_this5.currentRequest = 0;
+		_this5.requestData = [];
+
+		return _ret5 = _this5, _possibleConstructorReturn(_this5, _ret5);
+	}
+
+	/**
+  * Enqueue a request
+  * @param {...jQuery}  arguments - the request(s)
+  * @returns {AjaxSequence}
+  */
+
+
+	_createClass(AjaxSequence, [{
+		key: 'enqueue',
+		value: function enqueue() {
+			var _queue2;
+
+			if (this.queue.length <= this.settings.size) (_queue2 = this.queue).push.apply(_queue2, arguments);else console.warn("AjaxSequence.enqueue: queue size is at limit");
+
+			return this;
+		}
+
+		/**
+   * Dequeue all requests in order and
+   * return a promise when all is complete
+   * @param {jQuery} [defer] - deferred object to be returned
+   * @returns {jQuery} deferred promise
+   */
+
+	}, {
+		key: 'dequeue',
+		value: function dequeue() {
+			var defer = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : $.Deferred();
+
+			var self = this;
+
+			// queue is done, reset and resolve
+			if (this.queue.length === this.currentRequest) {
+				// clone data so it can be reset
+				var requestData = this.requestData;
+				this.currentRequest = 0;
+				this.requestData = [];
+				defer.resolve(requestData);
+			} else {
+				this.queue[this.currentRequest]().done(function (data) {
+					onComplete(data);
+				}).fail(function (data) {
+					if (self.settings.abortOnFail) defer.reject();else onComplete(data);
+				});
+			}
+
+			return defer.promise();
+
+			/**
+    * On complete handler for both fail and done
+    */
+			function onComplete(data) {
+				self.currentRequest++;
+				self.requestData.push(data);
+				self.dequeue(defer);
+			}
+		}
+	}]);
+
+	return AjaxSequence;
+}(AjaxQueue);

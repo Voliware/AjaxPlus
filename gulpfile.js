@@ -32,7 +32,8 @@ function buildAjaxPlus(){
 		src + 'ajaxModule.js',
 		src + 'ajaxPoll.js',
 		src + 'ajaxMonitor.js',
-		src + 'ajaxQueue.js'
+		src + 'ajaxQueue.js',
+		src + 'ajaxSequence.js'
 	];
 	return buildJs(js, dist, 'ajaxPlus');
 }

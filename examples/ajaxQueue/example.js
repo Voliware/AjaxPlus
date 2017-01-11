@@ -1,7 +1,7 @@
 
 var json = {
-	heartbeat : 'heartbeat.json',
-	simple : 'simple.json'
+	heartbeat : '../heartbeat.json',
+	simple : '../simple.json'
 };
 
 function request(){
@@ -15,13 +15,13 @@ function requestWithHandlers(){
 }
 
 // basic ajax queue
-var queue = new AjaxQueue({size:10});
-queue.enqueue(request)
+var queue = new AjaxQueue({size:10})
+	.enqueue(request)
 	.enqueue(request, request);
 
 // ajax queue with request delay
-var queueDelay = new AjaxQueue({size:3, delay:3000});
-queueDelay.enqueue(request, requestWithHandlers, request);
+var queueDelay = new AjaxQueue({size:3, delay:3000})
+	.enqueue(request, requestWithHandlers, request);
 
 /**
  * All requests will
@@ -60,4 +60,4 @@ class Route {
 
 Route.get().done(function(data){
 	console.log("success")
-})
+});
