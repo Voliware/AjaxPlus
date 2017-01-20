@@ -338,7 +338,7 @@ var AjaxModule = function (_EventSystem) {
 		// properties
 		_this.settings = $.extend(defaults, options);
 		_this.interval = null;
-		_this._cachedData = {};
+		_this.cachedData = {};
 
 		// states
 		_this.isFirstUpdate = true;
@@ -352,13 +352,12 @@ var AjaxModule = function (_EventSystem) {
 	/**
   * Makes the request
   * @returns {jQuery}
-  * @private
   */
 
 
 	_createClass(AjaxModule, [{
-		key: '_req',
-		value: function _req() {
+		key: 'request',
+		value: function request() {
 			var self = this;
 
 			return this._request().done(function (data) {
@@ -459,7 +458,7 @@ var AjaxModule = function (_EventSystem) {
 	}, {
 		key: '_cacheData',
 		value: function _cacheData(data) {
-			this._cachedData = $.extend(true, {}, data);
+			this.cachedData = $.extend(true, {}, data);
 			return this;
 		}
 
@@ -484,8 +483,8 @@ var AjaxModule = function (_EventSystem) {
 	}, {
 		key: 'start',
 		value: function start() {
-			this.interval = setInterval(this._req.bind(this), this.settings.interval);
-			return this._req();
+			this.interval = setInterval(this.request.bind(this), this.settings.interval);
+			return this.request();
 		}
 
 		/**
