@@ -46,7 +46,8 @@ class AjaxModule extends EventSystem {
 		// properties
 		this.settings = $.extend(defaults, options);
         this.interval = null;
-		this.cachedData = {};
+		this._cachedData = {};
+		this._processedData = {};
 
 		// states
 		this.isFirstUpdate = true;
@@ -69,8 +70,8 @@ class AjaxModule extends EventSystem {
 		return this._request()
 			.done(function(data){
 				self._cacheData(data);
-				data = self._processData(data);
-				self._done(data);
+				self._processData(data);
+				self._done(self._processedData);
 			})
 			.fail(function(data){
 				self._fail(data);
@@ -149,18 +150,19 @@ class AjaxModule extends EventSystem {
 	 * @private
 	 */
 	_cacheData(data){
-		this.cachedData = $.extend(true, {}, data);
+		this._cachedData = $.extend(true, {}, data);
 		return this;
 	}
 
 	/**
 	 * Process received data
 	 * @param {object} data
-	 * @returns {object}
+	 * @returns {AjaxModule}
 	 * @private
 	 */
 	_processData(data){
-		return data;
+		this._processedData = $.extend(true, {}, data);
+		return this;
 	}
 
 	/**
@@ -168,6 +170,7 @@ class AjaxModule extends EventSystem {
 	 * @returns {jQuery}
 	 */
     start(){
+		this.stop();
         this.interval = setInterval(this.request.bind(this), this.settings.interval);
         return this.request();
     }
