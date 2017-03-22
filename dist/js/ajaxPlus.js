@@ -995,6 +995,7 @@ var AjaxQueue = function (_EventSystem3) {
   * @param {object} [options]
   * @param {number} [options.size=100] - size of the queue
   * @param {number} [options.delay=0] - delay between requests in ms
+  * @param {number} [options.activeRequestLimit=1] - how many requests can fire at once (be dequeued)
   * @param {boolean} [options.abortOnFail=false] - whether to abandon the queue if one request fails
   * @returns {AjaxQueue}
   */
@@ -1008,11 +1009,14 @@ var AjaxQueue = function (_EventSystem3) {
 		var defaults = {
 			size: 100,
 			delay: 0,
+			activeRequestLimit: 1,
 			abortOnFail: false
 		};
-		_this4.settings = $.extend(defaults, options);
+
+		// properties
 		_this4.queue = [];
-		_this4.inProgress = false;
+		_this4.settings = $.extend(defaults, options);
+		_this4.activeRequests = 0;
 
 		return _ret4 = _this4, _possibleConstructorReturn(_this4, _ret4);
 	}
@@ -1026,7 +1030,6 @@ var AjaxQueue = function (_EventSystem3) {
 	_createClass(AjaxQueue, [{
 		key: '_next',
 		value: function _next() {
-			this.inProgress = false;
 			if (this.settings.delay > 0) setTimeout(this.dequeue.bind(this), this.settings.delay);else this.dequeue();
 			return this;
 		}
@@ -1055,26 +1058,30 @@ var AjaxQueue = function (_EventSystem3) {
 
 		/**
    * Dequeue all requests.
-   * Requests fire on previous always()
+   * Requests fire on previous done() or fail()
    * @returns {AjaxQueue}
    */
 
 	}, {
 		key: 'dequeue',
 		value: function dequeue() {
-			if (this.queue.length > 0 && !this.inProgress) {
+			if (this.queue.length > 0 && this.activeRequests < this.settings.activeRequestLimit) {
 				var self = this;
 				var req = this.queue.pop();
+				this.activeRequests++;
 
-				req().fail(function () {
+				req().done(function () {
+					self.activeRequests--;
+					self._next();
+				}).fail(function () {
+					self.activeRequests--;
 					if (self.settings.abortOnFail) {
 						self.queue = [];
+						self.activeRequests = 0;
 						return this;
 					} else {
 						self._next();
 					}
-				}).done(function () {
-					self._next();
 				});
 			}
 			return this;
