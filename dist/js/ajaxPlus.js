@@ -993,9 +993,9 @@ var AjaxQueue = function (_EventSystem3) {
 	/**
   * Constructor
   * @param {object} [options]
-  * @param {number} [options.size=100] - size of the queue
+  * @param {number} [options.size=100] - size of the queue. 0 is unlimited
   * @param {number} [options.delay=0] - delay between requests in ms
-  * @param {number} [options.activeRequestLimit=1] - how many requests can fire at once (be dequeued)
+  * @param {number} [options.activeRequestLimit=1] - how many requests can fire at once (be dequeued). 0 unlimited
   * @param {boolean} [options.abortOnFail=false] - whether to abandon the queue if one request fails
   * @returns {AjaxQueue}
   */
@@ -1037,14 +1037,14 @@ var AjaxQueue = function (_EventSystem3) {
 		/**
    * Enqueue a request.
    * Dequeues all requests immediately after
-   * @param {...jQuery}  arguments - the request(s)
+   * @param {...function}  arguments - the request(s)
    * @returns {AjaxQueue}
    */
 
 	}, {
 		key: 'enqueue',
 		value: function enqueue() {
-			if (this.queue.length <= this.settings.size) {
+			if (!this.settings.size || this.queue.length < this.settings.size) {
 				var _queue;
 
 				(_queue = this.queue).push.apply(_queue, arguments);
@@ -1065,7 +1065,7 @@ var AjaxQueue = function (_EventSystem3) {
 	}, {
 		key: 'dequeue',
 		value: function dequeue() {
-			if (this.queue.length > 0 && this.activeRequests < this.settings.activeRequestLimit) {
+			if (this.queue.length > 0 && (!this.settings.activeRequestLimit || this.activeRequests < this.settings.activeRequestLimit)) {
 				var self = this;
 				var req = this.queue.pop();
 				this.activeRequests++;
